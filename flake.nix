@@ -44,7 +44,7 @@
               local variant=''${variant,,}
 
               mkdir -p "$iconsDir"
-              cp -r "bocchi-$variant" "$iconsDir"
+              cp -r "bocchi-cursors-$variant" "$iconsDir"
             fi
           done
 

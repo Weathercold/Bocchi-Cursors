@@ -67,7 +67,7 @@
           home.pointerCursor = {
             package = self.packages.${pkgs.system}.bocchi-cursors.${variant};
             name = "Bocchi Cursors - ${display}";
-            size = 32;
+            size = 48;
             gtk.enable = true;
             x11.enable = true;
           };

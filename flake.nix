@@ -12,13 +12,21 @@
   outputs = { self, nixpkgs, flake-parts } @ inputs:
 
     let
+      inherit (nixpkgs.lib) mapAttrs' nameValuePair;
+      inherit (builtins) attrNames;
+
+      variants = {
+        "normal" = "Normal";
+        "shadowBlack" = "Shadow Black";
+      };
+
       mkBocchi = { lib, stdenvNoCC }: stdenvNoCC.mkDerivation {
         pname = "bocchi-cursors";
         version = "1.0";
 
         src = ./.;
 
-        outputs = [ "normal" "shadowBlack" "out" ];
+        outputs = [ "out" ] ++ (attrNames variants);
         outputsToInstall = [ ];
 
         dontBuild = true;
@@ -53,12 +61,31 @@
         };
       };
 
+      mkHomeModule = variant: display: nameValuePair
+        "bocchi-cursors-${variant}"
+        ({ config, pkgs, lib, ... }: {
+          home.pointerCursor = {
+            package = self.packages.bocchi-cursors.${variant};
+            name = "Bocchi Cursors - ${display}";
+            size = 32;
+            gtk.enable = true;
+            x11.enable = true;
+          };
+        });
+
       flakeModule = { withSystem, ... }: {
-        flake.overlays = rec {
-          default = bocchi-cursors;
-          bocchi-cursors = final: prev:
-            withSystem prev.stdenv.hostPlatform.system
-              ({ config, ... }: { inherit (config.packages) bocchi-cursors; });
+        flake = {
+          overlays = rec {
+            default = bocchi-cursors;
+            bocchi-cursors = final: prev:
+              withSystem prev.stdenv.hostPlatform.system
+                ({ config, ... }: { inherit (config.packages) bocchi-cursors; });
+          };
+
+          homeModules = rec {
+            default = bocchi-cursors-normal;
+            bocchi-cursors-normal = null;
+          } // (mapAttrs' mkHomeModule variants);
         };
 
         systems = [

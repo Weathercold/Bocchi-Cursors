@@ -63,9 +63,9 @@
 
       mkHomeModule = variant: display: nameValuePair
         "bocchi-cursors-${variant}"
-        ({ config, pkgs, lib, ... }: {
+        ({ pkgs, ... }: {
           home.pointerCursor = {
-            package = self.packages.bocchi-cursors.${variant};
+            package = self.packages.${pkgs.system}.bocchi-cursors.${variant};
             name = "Bocchi Cursors - ${display}";
             size = 32;
             gtk.enable = true;
@@ -88,13 +88,7 @@
           } // (mapAttrs' mkHomeModule variants);
         };
 
-        systems = [
-          "x86_64-linux"
-          "x86_64-darwin"
-          "aarch64-darwin"
-          "aarch64-linux"
-          "armv7l-linux"
-        ];
+        systems = nixpkgs.lib.systems.flakeExposed;
 
         perSystem = { pkgs, system, ... }: {
           packages = rec {
